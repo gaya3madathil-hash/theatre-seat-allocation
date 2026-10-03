@@ -33,9 +33,9 @@ static int tier_of_row(int i) { return i < 2 ? 0 : i < 4 ? 1 : 2; }   /* A-B, C-
 
 /* The programme. Each show has its own price for each tier. */
 static const struct { const char *title, *when; int price[3]; } SHOW_DEFS[] = {
-    { "Verity",    "Sat 10 Oct, 7:30 PM",  { 500, 350, 200 } },
-    { "Resident Evil",         "Sun 11 Oct, 6:00 PM",  { 600, 400, 250 } },
-    { "Digger",   "Sun 11 Oct, 11:00 AM", { 300, 200, 120 } },
+    { "Verity",    "Sat 10 Oct, 7:30 PM",  { 240, 180, 100 } },
+    { "Resident Evil",         "Sun 11 Oct, 6:00 PM",  { 300, 180, 120 } },
+    { "Digger",   "Sun 11 Oct, 11:00 AM", { 275, 150, 100 } },
 };
 #define NUM_SHOWS ((int)(sizeof SHOW_DEFS / sizeof SHOW_DEFS[0]))
 
