@@ -92,7 +92,7 @@ make test         # builds, starts the server on a free port, runs 26 API tests 
 2. On render.com choose **New > Web Service**, connect the repo, set **Runtime: Docker**.
 3. Deploy. Render sets `PORT` automatically; copy the public URL into this README.
 
-Live demo: _paste your deployed link here_
+Live demo: https://theatre-seat-allocation-1.onrender.com
 
 Note: bookings live in memory, so they reset when the service restarts. The server handles one request at a time, which is also what makes each group booking atomic.
 
