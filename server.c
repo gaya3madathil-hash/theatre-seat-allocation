@@ -28,14 +28,14 @@
 #define SHOW_BOOKINGS 30  /* newest bookings (per show) sent to the client */
 #define RUPEE "\xe2\x82\xb9"
 
-static const char *TIER_NAME[] = { "Premium", "Standard", "Economy" };
+static const char *TIER_NAME[] = { "Economy", "Standard", "Premium" };
 static int tier_of_row(int i) { return i < 2 ? 0 : i < 4 ? 1 : 2; }   /* A-B, C-D, E-F */
 
 /* The programme. Each show has its own price for each tier. */
 static const struct { const char *title, *when; int price[3]; } SHOW_DEFS[] = {
-    { "Verity",    "Sat 10 Oct, 7:30 PM",  { 240, 180, 100 } },
-    { "Resident Evil",         "Sun 11 Oct, 6:00 PM",  { 300, 180, 120 } },
-    { "Digger",   "Sun 11 Oct, 11:00 AM", { 275, 150, 100 } },
+    { "Verity",    "Sat 10 Oct, 7:30 PM",  { 100, 180, 240 } },
+    { "Resident Evil",         "Sun 11 Oct, 6:00 PM",  { 120, 180, 220 } },
+    { "Digger",   "Sun 11 Oct, 11:00 AM", { 100, 150, 250 } },
 };
 #define NUM_SHOWS ((int)(sizeof SHOW_DEFS / sizeof SHOW_DEFS[0]))
 
