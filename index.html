@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Curtain Call - Theatre Seat Allocation</title>
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,600&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--house:#16121c;--panel:#201a29;--line:#3a3048;--text:#efe8dc;--muted:#a79db3;--brass:#d2a94f;--velvet:#8e2446;--ok:#7fc8a0;--err:#f09aa8;--t0:#d2a94f;--t1:#8fa9d6;--t2:#7fc8a0}
+*{box-sizing:border-box}
+body{margin:0;background:var(--house);color:var(--text);font:16px/1.5 "DM Sans",system-ui,sans-serif}
+.wrap{max-width:1100px;margin:0 auto;padding:28px 20px 48px}
+h1{font:600 clamp(2rem,5vw,3.2rem)/1.05 "Bodoni Moda",Georgia,serif;margin:0 0 6px}
+h2{font-size:1rem;margin:0 0 10px}
+.sub{color:var(--muted);margin:0 0 18px;max-width:64ch}
+.shows{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px;margin:0 0 18px}
+.showbtn{text-align:left;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px;color:var(--text);cursor:pointer;font:inherit}
+.showbtn:hover{border-color:var(--muted)}
+.showbtn[aria-selected=true]{border-color:var(--brass);box-shadow:0 0 0 1px var(--brass) inset}
+.showbtn b{display:block;font:600 1.05rem/1.25 "Bodoni Moda",Georgia,serif;margin-bottom:2px}
+.showbtn span{display:block;color:var(--muted);font-size:.82rem}
+.showbtn .avail{color:var(--ok);margin-top:4px}
+.showbtn .avail.low{color:var(--brass)}
+.showbtn .avail.out{color:var(--err)}
+.banner{min-height:2.6em;margin:0 0 18px;padding:9px 14px;border-radius:10px;background:var(--panel);border:1px solid var(--line);color:var(--ok);font-size:.92rem}
+.banner:empty{display:none}
+.banner.err{color:var(--err);border-color:#5a2a38}
+.layout{display:grid;grid-template-columns:1fr 330px;gap:28px;align-items:start}
+@media(max-width:860px){.layout{grid-template-columns:1fr}}
+.stage{height:34px;border-radius:50% 50% 0 0/100% 100% 0 0;background:linear-gradient(var(--velvet),#5a1530);color:#f4d9e2;text-align:center;line-height:34px;font-size:.85rem;margin:0 8% 22px}
+.row{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.lbl{width:20px;font-weight:700;color:var(--brass)}
+.rp{width:44px;text-align:right;color:var(--muted);font-size:.78rem}
+.seats{display:flex;flex:1;align-items:center;min-width:0}
+.seats>*{flex:1}
+.link{height:2px;background:var(--line);flex:0 0 6px}
+.seat{aspect-ratio:1;max-width:46px;min-width:0;border-radius:9px 9px 5px 5px;border:1.5px solid var(--t0);background:transparent;color:var(--text);font:500 .8rem "DM Sans",sans-serif;cursor:pointer;padding:0}
+.seat.t1{border-color:var(--t1)}
+.seat.t2{border-color:var(--t2)}
+.seat:hover{background:#2c2338}
+.seat.sel{background:var(--brass);border-color:var(--brass);color:#1c1608;font-weight:700}
+.seat.b{background:var(--velvet);border-color:var(--velvet);font-weight:700}
+.seat.b:hover{background:#a82c54}
+.seat:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--ok);outline-offset:2px}
+@media(max-width:560px){.rp{display:none}.link{flex-basis:3px}.seat{font-size:.65rem;border-radius:6px 6px 3px 3px}.row{gap:5px}}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;color:var(--muted);font-size:.85rem;margin-top:18px}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;margin:0 6px -1px 0;border:1.5px solid var(--t0)}
+.legend i.t1{border-color:var(--t1)}.legend i.t2{border-color:var(--t2)}
+.legend i.sel{background:var(--brass);border-color:var(--brass)}
+.legend i.b{background:var(--velvet);border-color:var(--velvet)}
+aside{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:0 0 16px}
+.stats div{background:var(--house);border-radius:8px;padding:8px 10px;font-size:.8rem;color:var(--muted)}
+.stats b{display:block;font-size:1.05rem;color:var(--text)}
+label{display:block;font-size:.85rem;color:var(--muted);margin:12px 0 4px}
+input,select{width:100%;padding:10px;border-radius:8px;border:1px solid var(--line);background:var(--house);color:var(--text);font:inherit}
+button.act{width:100%;margin-top:12px;padding:11px;border:0;border-radius:8px;background:var(--brass);color:#1c1608;font:700 .95rem "DM Sans",sans-serif;cursor:pointer}
+button.act:disabled{opacity:.4;cursor:not-allowed}
+button.ghost{background:transparent;color:var(--muted);border:1px solid var(--line)}
+hr{border:0;border-top:1px solid var(--line);margin:18px 0 6px}
+.note{color:var(--muted);font-size:.82rem;margin:0}
+.pick{display:grid;grid-template-columns:34px 1fr auto 24px;gap:8px;align-items:center;margin-top:8px}
+.pick .id{font-weight:700;color:var(--brass)}
+.pick .pp{color:var(--muted);font-size:.85rem}
+.pick .x{background:none;border:0;color:var(--muted);font-size:1.2rem;cursor:pointer;padding:0}
+.total{display:flex;justify-content:space-between;margin-top:14px;font-weight:700}
+section.bookings{margin-top:34px}
+section.bookings h2{font:600 1.6rem "Bodoni Moda",Georgia,serif}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px}
+.card header{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.card header b{font-size:1.05rem}
+.badge{font-size:.72rem;padding:2px 8px;border-radius:99px;border:1px solid var(--ok);color:var(--ok)}
+.badge.part{border-color:var(--brass);color:var(--brass)}
+.badge.off{border-color:var(--err);color:var(--err)}
+.card header .amt{margin-left:auto;font-weight:700}
+.card ul{list-style:none;margin:0;padding:0;font-size:.9rem}
+.card li{display:grid;grid-template-columns:38px 1fr auto;gap:6px;padding:3px 0}
+.card li.cx{color:var(--muted);text-decoration:line-through}
+.card li.cx em{text-decoration:none;font-style:normal;color:var(--err)}
+.card .act{margin-top:10px;padding:8px;font-size:.85rem}
+.empty{color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Curtain Call</h1>
+  <p class="sub">Pick a show, then pick seats. The programme is a linked list of shows; each show has a linked list of rows, every row is a linked list of seats, and every booking is a linked list of tickets.</p>
+  <div class="shows" id="shows" role="tablist" aria-label="Choose a show"></div>
+  <div class="banner" id="msg" role="status" aria-live="polite"></div>
+  <div class="layout">
+    <main>
+      <div class="stage" id="stage">Stage</div>
+      <div id="hall" aria-label="Seat map"></div>
+      <div class="legend" id="legend"></div>
+    </main>
+    <aside>
+      <div class="stats">
+        <div>Booked<b id="booked">0</b></div>
+        <div>Free<b id="free">0</b></div>
+        <div>Sales<b id="sales">&#8377;0</b></div>
+        <div>Refunded<b id="refunded">&#8377;0</b></div>
+      </div>
+
+      <h2>Your tickets</h2>
+      <div id="picked"></div>
+      <div class="total"><span id="count">0 tickets</span><span id="total">&#8377;0</span></div>
+      <button class="act" id="book" disabled>Book tickets</button>
+      <p class="note" style="margin-top:10px">Tap free seats to pick them, then enter a name for each person. All seats are booked together, or none are. Tap a booked seat to cancel it.</p>
+
+      <hr>
+      <h2>Seat a group together</h2>
+      <label for="group">Names (comma separated)</label>
+      <input id="group" autocomplete="off" placeholder="Asha, Ravi, Meena">
+      <label for="tier">Section</label>
+      <select id="tier"><option value="any">Any section</option></select>
+      <button class="act" id="auto">Find adjacent seats</button>
+      <button class="act ghost" id="reset">Clear this show's bookings</button>
+    </aside>
+  </div>
+
+  <section class="bookings">
+    <h2 id="bookingsTitle">Bookings</h2>
+    <div class="cards" id="bookings"></div>
+  </section>
+</div>
+<script>
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const inr = n => "\u20B9" + n;
+const clean = s => s.replace(/[,"\\]/g, " ").replace(/\s+/g, " ").trim();
+let data = null;
+let showId = 1;  // the show being viewed; sent with every request
+let sel = [];   // picked seats: {row, num, price, name} (always for the current show)
+
+function showMsg(text, ok) { const m = $("msg"); m.textContent = text; m.className = "banner" + (ok ? "" : " err"); }
+
+async function call(path, params = {}) {
+  const qs = new URLSearchParams({ show: showId, ...params }).toString();
+  try {
+    const res = await fetch(`/api/${path}?${qs}`, { method: path === "seats" ? "GET" : "POST" });
+    data = await res.json();
+  } catch (e) { showMsg("Could not reach the server.", false); return null; }
+  showId = data.show.id;
+  render();
+  return data;
+}
+
+function renderShows() {
+  const box = $("shows");
+  box.innerHTML = "";
+  data.shows.forEach(s => {
+    const b = document.createElement("button");
+    b.className = "showbtn"; b.setAttribute("role", "tab");
+    b.setAttribute("aria-selected", s.id === data.show.id);
+    const cls = s.free === 0 ? "out" : s.free <= 10 ? "low" : "";
+    const left = s.free === 0 ? "Sold out" : `${s.free} of ${s.total} seats left`;
+    b.innerHTML = `<b>${esc(s.title)}</b><span>${esc(s.when)}</span><span>From ${inr(s.from)}</span><span class="avail ${cls}">${left}</span>`;
+    b.onclick = () => { if (s.id !== showId) { sel = []; showId = s.id; call("seats"); } };
+    box.appendChild(b);
+  });
+  $("stage").textContent = `Stage · ${data.show.title}`;
+  $("bookingsTitle").textContent = `Bookings for ${data.show.title}`;
+  document.title = `${data.show.title} - Curtain Call`;
+}
+
+const refundFor = price => Math.floor(price * (100 - data.feePct) / 100);
+const isSel = (row, num) => sel.some(x => x.row === row && x.num === num);
+
+function render() {
+  showMsg(data.message, data.ok);
+  $("booked").textContent = data.booked;
+  $("free").textContent = data.total - data.booked;
+  $("sales").textContent = inr(data.sales);
+  $("refunded").textContent = inr(data.refunded);
+  // drop picks whose seat is no longer free
+  sel = sel.filter(x => { const r = data.rows.find(r => r.label === x.row); const s = r && r.seats.find(s => s.n === x.num); return s && !s.b; });
+  renderShows(); renderLegend(); renderTiers(); renderHall(); renderSel(); renderBookings();
+}
+
+function renderLegend() {
+  $("legend").innerHTML = data.tiers.map((t, i) => `<span><i class="${i ? "t" + i : ""}"></i>${t.name} ${inr(t.price)}</span>`).join("")
+    + '<span><i class="sel"></i>Selected</span><span><i class="b"></i>Booked</span>';
+}
+
+function renderTiers() {   // section picker: prices differ per show, so rebuild it each time
+  const s = $("tier"), keep = s.value || "any";
+  s.innerHTML = '<option value="any">Any section</option>';
+  data.tiers.forEach(t => { const o = document.createElement("option"); o.value = t.name.toLowerCase(); o.textContent = `${t.name} (${inr(t.price)} each)`; s.appendChild(o); });
+  s.value = keep;
+}
+
+function renderHall() {
+  const hall = $("hall"); hall.innerHTML = "";
+  data.rows.forEach(r => {
+    const row = document.createElement("div"); row.className = "row";
+    row.innerHTML = `<span class="lbl">${r.label}</span>`;
+    const seats = document.createElement("div"); seats.className = "seats";
+    r.seats.forEach((s, i) => {
+      if (i) { const l = document.createElement("span"); l.className = "link"; seats.appendChild(l); }
+      const b = document.createElement("button");
+      const picked = isSel(r.label, s.n);
+      b.className = `seat t${r.tier}` + (s.b ? " b" : picked ? " sel" : "");
+      b.textContent = s.b ? s.name[0].toUpperCase() : s.n;
+      b.title = s.b ? `${r.label}${s.n}: ${s.name} (tap to cancel)` : `${r.label}${s.n}: ${inr(r.price)}`;
+      b.setAttribute("aria-label", b.title);
+      if (!s.b) b.setAttribute("aria-pressed", picked);
+      b.onclick = () => s.b ? cancelSeat(r, s) : toggle(r, s);
+      seats.appendChild(b);
+    });
+    row.appendChild(seats);
+    row.insertAdjacentHTML("beforeend", `<span class="rp">${inr(r.price)}</span>`);
+    hall.appendChild(row);
+  });
+}
+
+function toggle(r, s) {
+  const i = sel.findIndex(x => x.row === r.label && x.num === s.n);
+  if (i >= 0) sel.splice(i, 1);
+  else if (sel.length >= data.maxGroup) return showMsg(`You can pick at most ${data.maxGroup} seats at once.`, false);
+  else sel.push({ row: r.label, num: s.n, price: r.price, name: "" });
+  renderHall(); renderSel();
+}
+
+function renderSel() {
+  const box = $("picked"); box.innerHTML = "";
+  if (!sel.length) box.innerHTML = '<p class="empty note">No seats picked yet.</p>';
+  sel.forEach((x, i) => {
+    const el = document.createElement("div"); el.className = "pick";
+    el.innerHTML = `<span class="id">${x.row}${x.num}</span><input maxlength="30" autocomplete="off" placeholder="Guest name" aria-label="Guest name for seat ${x.row}${x.num}"><span class="pp">${inr(x.price)}</span><button class="x" aria-label="Remove seat ${x.row}${x.num}">&times;</button>`;
+    const inp = el.querySelector("input"); inp.value = x.name;
+    inp.oninput = () => { x.name = inp.value; };
+    el.querySelector(".x").onclick = () => { sel.splice(i, 1); renderHall(); renderSel(); };
+    box.appendChild(el);
+  });
+  const total = sel.reduce((a, x) => a + x.price, 0);
+  $("count").textContent = `${sel.length} ticket${sel.length === 1 ? "" : "s"}`;
+  $("total").textContent = inr(total);
+  $("book").disabled = !sel.length;
+  $("book").textContent = sel.length ? `Book ${sel.length} ticket${sel.length === 1 ? "" : "s"} \u00B7 ${inr(total)}` : "Book tickets";
+}
+
+function renderBookings() {
+  const box = $("bookings");
+  if (!data.bookings.length) { box.innerHTML = '<p class="empty">No bookings yet.</p>'; return; }
+  box.innerHTML = data.bookings.slice().reverse().map(b => {
+    const active = b.tickets.filter(t => !t.cancelled);
+    const paid = active.reduce((a, t) => a + t.price, 0);
+    const refund = active.reduce((a, t) => a + refundFor(t.price), 0);
+    const state = !active.length ? ["Cancelled", "off"] : active.length < b.tickets.length ? ["Partly cancelled", "part"] : ["Confirmed", ""];
+    const rows = b.tickets.map(t => t.cancelled
+      ? `<li class="cx"><span>${esc(t.seat)}</span><span>${esc(t.name)}</span><em>refund ${inr(t.refund)}</em></li>`
+      : `<li><span>${esc(t.seat)}</span><span>${esc(t.name)}</span><span>${inr(t.price)}</span></li>`).join("");
+    const btn = active.length ? `<button class="act ghost" data-cancel="${b.id}" data-refund="${refund}" data-n="${active.length}">Cancel booking (refund ${inr(refund)})</button>` : "";
+    return `<article class="card"><header><b>#${b.id}</b><span class="badge ${state[1]}">${state[0]}</span><span class="amt">${inr(paid)}</span></header><ul>${rows}</ul>${btn}</article>`;
+  }).join("");
+  box.querySelectorAll("[data-cancel]").forEach(btn => btn.onclick = () => {
+    const { cancel, refund, n } = btn.dataset;
+    if (confirm(`Cancel booking #${cancel} (${n} ticket${n === "1" ? "" : "s"})?\nRefund: ${inr(refund)} after the ${data.feePct}% fee.`)) call("cancel", { booking: cancel });
+  });
+}
+
+function cancelSeat(r, s) {
+  if (confirm(`Cancel seat ${r.label}${s.n} (${s.name})?\nRefund: ${inr(refundFor(r.price))} after the ${data.feePct}% fee.`))
+    call("cancel", { booking: s.bk, seat: r.label + s.n });
+}
+
+$("book").onclick = async () => {
+  const missing = sel.find(x => !clean(x.name));
+  if (missing) return showMsg(`Enter a name for seat ${missing.row}${missing.num}.`, false);
+  const d = await call("book", { tickets: sel.map(x => `${x.row}${x.num}:${clean(x.name)}`).join(",") });
+  if (d && d.ok) { sel = []; renderHall(); renderSel(); }
+};
+
+$("auto").onclick = () => {
+  const names = $("group").value.split(",").map(clean).filter(Boolean).join(",");
+  if (!names) return showMsg("Enter at least one name.", false);
+  call("auto", { names, tier: $("tier").value });
+};
+
+$("reset").onclick = () => { if (confirm(`Clear every booking for ${data.show.title}? Other shows are not affected.`)) { sel = []; call("reset"); } };
+
+call("seats");
+</script>
+</body>
+</html>
