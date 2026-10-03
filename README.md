@@ -13,9 +13,9 @@ A full stack project that shows a real use of the **linked list** data structure
 
   | Show | When | Premium | Standard | Economy |
   |---|---|---|---|---|
-  | Midnight at the Mahal | Sat 10 Oct, 7:30 PM | ₹500 | ₹350 | ₹200 |
-  | The Last Monsoon | Sun 11 Oct, 6:00 PM | ₹600 | ₹400 | ₹250 |
-  | Jungle Tales (Matinee) | Sun 11 Oct, 11:00 AM | ₹300 | ₹200 | ₹120 |
+  | Verity | Sat 10 Oct, 7:30 PM | ₹500 | ₹350 | ₹200 |
+  | Resident Evil | Sun 11 Oct, 6:00 PM | ₹600 | ₹400 | ₹250 |
+  | Digger | Sun 11 Oct, 11:00 AM | ₹300 | ₹200 | ₹120 |
 
 - **Book for several people at once:** pick up to 10 seats, give each seat its own guest name, and book them in a single request. The booking is all-or-nothing: if any seat is taken, nothing is booked.
 - **Cancellation:** cancel one ticket (tap a booked seat) or a whole booking. A **10% cancellation fee** is kept; the rest is refunded at the price that ticket was sold for. The seat is freed straight away.
